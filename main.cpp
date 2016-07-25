@@ -86,13 +86,14 @@ int largest_contour_index = 0;
     /// Create a structuring element (SE)
     int morph_size = 1;
     Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-    cout<<element;
+    cout<<element<<"\n";
     for (int i=1;i<5;i++)
     { 
     morphologyEx( skinMat, dst, MORPH_CLOSE, element, Point(-1,-1), i );   
     }
     //threshold(edges, threshold_output, 100, 255, CV_THRESH_OTSU );
-    findContours( skinMat_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    //findContours( skinMat_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+    findContours( skinMat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
 
 	/// Find the convex hull,contours and defects for each contour
 	vector<vector<Point> >hull(contours.size());
