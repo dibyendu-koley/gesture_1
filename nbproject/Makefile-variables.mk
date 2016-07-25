@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux
-CND_ARTIFACT_NAME_Debug=gesture
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/gesture
+CND_ARTIFACT_NAME_Debug=gesture_1
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux/gesture_1
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux/package
-CND_PACKAGE_NAME_Debug=gesture.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/gesture.tar
+CND_PACKAGE_NAME_Debug=gesture1.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux/package/gesture1.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux
-CND_ARTIFACT_NAME_Release=gesture
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/gesture
+CND_ARTIFACT_NAME_Release=gesture_1
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux/gesture_1
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux/package
-CND_PACKAGE_NAME_Release=gesture.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/gesture.tar
+CND_PACKAGE_NAME_Release=gesture1.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux/package/gesture1.tar
 #
 # include compiler specific variables
 #

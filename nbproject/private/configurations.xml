@@ -29,8 +29,9 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" 1 /usr/local/src/openalpr/lp.jpg</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" 1 /usr/local/src/openalpr/ea7the.jpg</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" 1 /usr/local/src/openalpr/h786poj.jpg</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" 2 /usr/local/src/openalpr/h786poj.jpg</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" 1 /usr/local/src/openalpr/h786poj.jpg</runcommand>
+        <runcommand>"${OUTPUT_PATH}" 2 /usr/local/src/openalpr/h786poj.jpg</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=gesture
+PROJECTNAME=gesture_1
 
 # Active Configuration
 DEFAULTCONF=Debug

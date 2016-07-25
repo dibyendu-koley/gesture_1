@@ -23,112 +23,29 @@
 using namespace std;
 using namespace cv;
 /** Function Headers */
- void detectAndDisplay( Mat frame );
- int findBiggestContour(vector<vector<Point> >);
 
- /** Global variables */
- //String face_cascade_name = "haarcascade_frontalface_alt.xml";
- String face_cascade_name = "/usr/share/openalpr/runtime_data/region/eu.xml";
- //String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
- CascadeClassifier face_cascade;
- //CascadeClassifier eyes_cascade;
- string window_name = "Capture - Face detection";
- RNG rng(12345);
-/*
- * 
- */
-void readme();
- 
-int main(int argc, char** argv) {
-     if( argc != 3 )
-  { readme(); return -1; }
-     Mat frame;
-int option = atoi(argv[1]);
-if(option == 2){
-CvCapture* capture;
-
-   
-
-   //-- 1. Load the cascades
-   if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
-//   if( !eyes_cascade.load( eyes_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
-
-   //-- 2. Read the video stream
-   capture = cvCaptureFromCAM( -1 );
-   if( capture )
-   {
-     while( true )
-     {
-   frame = cvQueryFrame( capture );
-
-   //-- 3. Apply the classifier to the frame
-       if( !frame.empty() )
-       { detectAndDisplay( frame ); }
-       else
-       { printf(" --(!) No captured frame -- Break!"); break; }
-
-       int c = waitKey(10);
-       if( (char)c == 'c' ) { break; }
-      }
-   }
-}
-else {
-    frame = imread(argv[2]);
-detectAndDisplay( frame );
-waitKey();
-}
-    return 0;
-}
-
-/** @function detectAndDisplay */
-void detectAndDisplay( Mat frame )
+void condefects(vector<Vec4i> convexityDefectsSet, vector<Point> mycontour, Mat &original)
 {
-  SkinDetector mySkinDetector;
-  std::vector<Rect> faces;
-  Mat frame_gray;
-  Mat skinMat;
-  Mat ROI;
-  Mat ROI_gray;
-  vector<vector<Point> > contours;
-  vector<Vec4i> hierarchy;
-    
-  skinMat= mySkinDetector.getSkin(frame);
-  findContours( skinMat, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-  int s = findBiggestContour(contours);
-  Mat drawing = Mat::zeros( frame.size(), CV_8UC1 );
-  
-  vector<vector<Point> > contours_poly( contours.size() );
-  vector<Rect> boundRect( contours.size() );
-  
-  approxPolyDP( Mat(contours[s]), contours_poly[s], 3, true );
-  boundRect[s] = boundingRect( Mat(contours_poly[s]) );
-  ROI = frame(boundRect[s]);
-  rectangle( frame, boundRect[s].tl(), boundRect[s].br(), Scalar(0,0,255), 2, 8, 0 );
-  
+	for (int cDefIt = 0; cDefIt < convexityDefectsSet.size(); cDefIt++) {
 
-  //drawContours( drawing, contours, s, Scalar(255), -1, 8, hierarchy, 0, Point() );
-  //rectangle( frame, contours[s], Scalar(0,0,255), 2, 8, 0 );
-  imshow("ROI", ROI);
-    
-  cvtColor( frame, frame_gray, CV_BGR2GRAY );
-  equalizeHist( frame_gray, frame_gray );
-  cvtColor( ROI, ROI_gray, CV_BGR2GRAY );
-  equalizeHist( ROI_gray, ROI_gray );
+		int startIdx = convexityDefectsSet[cDefIt].val[0]; Point ptStart(mycontour[startIdx]);
 
-  //-- Detect faces
-  face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
-  //face_cascade.detectMultiScale( ROI_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, Size(30, 30) );
+		int endIdx = convexityDefectsSet[cDefIt].val[1]; Point ptEnd(mycontour[endIdx]);
 
-  for( size_t i = 0; i < faces.size(); i++ )
-  {
-    rectangle(frame,faces[i],Scalar(255,0,255),2,4,0);
-    
-  }
-  //-- Show what you got
-  
-  imshow("Skin Image",skinMat);
-  imshow( window_name, frame );
- }
+		int farIdx = convexityDefectsSet[cDefIt].val[2]; Point ptFar(mycontour[farIdx]);
+
+		double depth = static_cast<double>(convexityDefectsSet[cDefIt].val[3]) / 256;
+		//cout << "depth" << depth << endl;
+		//display start points
+		circle(original,ptStart,5,CV_RGB(255,0,0),2,8);
+		//display all end points
+		circle(original, ptEnd, 5, CV_RGB(255, 255, 0), 2, 8);
+		//display all far points
+		circle(original,ptFar,5,CV_RGB(0,0,255),2,8);
+	}
+
+}// condefects ends here
+
 int findBiggestContour(vector<vector<Point> > contours){
     int indexOfBiggestContour = -1;
     int sizeOfBiggestContour = 0;
@@ -140,8 +57,65 @@ int findBiggestContour(vector<vector<Point> > contours){
     }
     return indexOfBiggestContour;
 }
-void readme()
-  { std::cout << " Usage: ./executable_file <option> <path_of_image_file OR video> \n" << std::endl;
-   std::cout << " Option: 1 = Load image from file i.e image file path \n" << std::endl;
-   std::cout << " Option: 2 = web cam \n" << std::endl;
+int main()
+{
+int c = 0;
+VideoCapture cap(0);
+SkinDetector mySkinDetector;
+Mat frame;
+Mat edges;
+Mat skinMat,skinMat_tmp;
+Mat threshold_output;
+cv::vector<cv::Vec4i> hierarchy;
+std::vector<std::vector<cv::Point> > contours;
+   Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
+RNG rng(12345);
+int largest_area = 0;
+int largest_contour_index = 0;
+
+
+//while( c != 27)
+//{
+    while( true )
+     {
+    cap >> frame;
+    cvtColor(frame, edges, CV_BGR2GRAY);
+    skinMat= mySkinDetector.getSkin(frame);
+    skinMat_tmp = mySkinDetector.getSkin(frame);
+    Mat dst; // result matrix00000
+    /// Create a structuring element (SE)
+    int morph_size = 1;
+    Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+    cout<<element;
+    for (int i=1;i<5;i++)
+    { 
+    morphologyEx( skinMat, dst, MORPH_CLOSE, element, Point(-1,-1), i );   
+    }
+    //threshold(edges, threshold_output, 100, 255, CV_THRESH_OTSU );
+    findContours( skinMat_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
+
+	/// Find the convex hull,contours and defects for each contour
+	vector<vector<Point> >hull(contours.size());
+	vector<vector<int> >inthull(contours.size());
+	vector<vector<Vec4i> >defects(contours.size());
+	for (int i = 0; i < contours.size(); i++)
+	{
+		convexHull(Mat(contours[i]), hull[i], false);
+		convexHull(Mat(contours[i]), inthull[i], false);
+		if (inthull[i].size()>3)
+			convexityDefects(contours[i], inthull[i], defects[i]);
+	}
+ 
+        
+        int s = findBiggestContour(contours);
+        drawContours(frame, hull, s, CV_RGB(0, 0, 255), 2, 8, hierarchy);
+        condefects(defects[s], contours[s],frame);
+    imshow("frame",frame);
+    imshow("skin",skinMat);
+    imshow("morf",dst);
+    int c = waitKey(10);
+       if( (char)c == 'q' ) { break; }
+    //waitKey();
+}
+return 0;
 }
