@@ -87,7 +87,7 @@ int largest_contour_index = 0;
     int morph_size = 1;
     Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
     cout<<element<<"\n";
-    for (int i=1;i<5;i++)
+    for (int i=1;i<3;i++)
     { 
     morphologyEx( skinMat, dst, MORPH_CLOSE, element, Point(-1,-1), i );   
     }
@@ -107,9 +107,21 @@ int largest_contour_index = 0;
 			convexityDefects(contours[i], inthull[i], defects[i]);
 	}
  
-        
+        /*------------------------------------*/
+        /// Get the moments
+  vector<Moments> mu(contours.size() );
+  for( int i = 0; i < contours.size(); i++ )
+     { mu[i] = moments( contours[i], false ); }
+
+  ///  Get the mass centers:
+  vector<Point2f> mc( contours.size() );
+  for( int i = 0; i < contours.size(); i++ )
+     { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
+  
+        /*------------------------------------*/
         int s = findBiggestContour(contours);
         drawContours(frame, hull, s, CV_RGB(0, 0, 255), 2, 8, hierarchy);
+               circle( frame, mc[s], 4, CV_RGB(250, 255, 255), -1, 8, 0 );
         condefects(defects[s], contours[s],frame);
     imshow("frame",frame);
     imshow("skin",skinMat);
