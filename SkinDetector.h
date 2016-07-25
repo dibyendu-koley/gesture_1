@@ -24,7 +24,9 @@ SkinDetector(void);
 ~SkinDetector(void);
 
 cv::Mat getSkin(cv::Mat input);
-
+//cv::Mat setSkinCrCb(cv::Mat input);
+void setSkinCrCb(cv::Rect rRect, cv::Mat frame);
+cv::vector<cv::Point3f> RGBToYCbCr(std::vector<cv::Point3f> objectPoints);
 private:
 int Y_MIN;
 int Y_MAX;

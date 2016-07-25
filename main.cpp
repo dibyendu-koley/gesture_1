@@ -72,29 +72,29 @@ std::vector<std::vector<cv::Point> > contours;
 RNG rng(12345);
 int largest_area = 0;
 int largest_contour_index = 0;
+cv::Rect rRect(Point(10,10),Point(20,20));
 
-
-//while( c != 27)
-//{
-    while( true )
+  while( true )
      {
     cap >> frame;
+    //setSkin()
     cvtColor(frame, edges, CV_BGR2GRAY);
     skinMat= mySkinDetector.getSkin(frame);
+    mySkinDetector.setSkinCrCb(rRect,frame);
     skinMat_tmp = mySkinDetector.getSkin(frame);
     Mat dst; // result matrix00000
     /// Create a structuring element (SE)
     int morph_size = 1;
     Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-    cout<<element<<"\n";
+    //cout<<element<<"\n";
+    //Point3_<uchar>* p = frame.ptr<Point3_<uchar> >(20,200);
+    
+    //frame.at<cv::Vec3b>(10,10);
     for (int i=1;i<3;i++)
     { 
     morphologyEx( skinMat, dst, MORPH_CLOSE, element, Point(-1,-1), i );   
     }
-    //threshold(edges, threshold_output, 100, 255, CV_THRESH_OTSU );
-    //findContours( skinMat_tmp, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
     findContours( skinMat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
-
 	/// Find the convex hull,contours and defects for each contour
 	vector<vector<Point> >hull(contours.size());
 	vector<vector<int> >inthull(contours.size());
@@ -106,19 +106,14 @@ int largest_contour_index = 0;
 		if (inthull[i].size()>3)
 			convexityDefects(contours[i], inthull[i], defects[i]);
 	}
- 
-        /*------------------------------------*/
         /// Get the moments
   vector<Moments> mu(contours.size() );
   for( int i = 0; i < contours.size(); i++ )
      { mu[i] = moments( contours[i], false ); }
-
   ///  Get the mass centers:
   vector<Point2f> mc( contours.size() );
   for( int i = 0; i < contours.size(); i++ )
      { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
-  
-        /*------------------------------------*/
         int s = findBiggestContour(contours);
         drawContours(frame, hull, s, CV_RGB(0, 0, 255), 2, 8, hierarchy);
                circle( frame, mc[s], 4, CV_RGB(250, 255, 255), -1, 8, 0 );
