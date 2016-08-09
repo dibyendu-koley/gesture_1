@@ -14,12 +14,12 @@ SkinDetector::SkinDetector(void)
 //YCrCb threshold
 // You can change the values and see what happens
 //;       //actual
-Y_MIN  = 120;
-Y_MAX  = 210;
-Cr_MIN = 110;
-Cr_MAX = 171;
-Cb_MIN = 70;
-Cb_MAX = 171;
+//Y_MIN  = 120;
+//Y_MAX  = 210;
+//Cr_MIN = 110;
+//Cr_MAX = 171;
+//Cb_MIN = 70;
+//Cb_MAX = 171;
 }
 
 SkinDetector::~SkinDetector(void)
@@ -29,16 +29,18 @@ void SkinDetector::printSkinCrCb(cv::Rect rRect, cv::Mat img)
 {
     float Y_min,Y_max,Cr_min,Cr_max,Cb_min,Cb_max;
     std::vector<float> Y,Cr,Cb;
-    for(int y = rRect.y; y < rRect.y + rRect.height - 3; y++){
-    for(int x = rRect.x; x < rRect.x + rRect.width - 3; x++)
+    for(int x = rRect.x; x < rRect.x + rRect.width ; x++)
     {
+    for(int y = rRect.y; y < rRect.y + rRect.height ; y++){
+    
         
         Y.push_back(img.at< cv::Vec3b>(x, y)[0]);
         Cr.push_back(img.at< cv::Vec3b>(x, y)[1]);
         Cb.push_back(img.at< cv::Vec3b>(x, y)[2]);
         //cout<<Y_min<<":"<<Cr_min<<":"<<Cb_min<<"-";
+        cout<<x<<":"<<y<<"-";
     }
-    //cout<<"\n";
+    cout<<"\n";
     }
     Y_min = *min_element(Y.begin(), Y.end());
     Y_max = *max_element(Y.begin(), Y.end());
@@ -46,8 +48,15 @@ void SkinDetector::printSkinCrCb(cv::Rect rRect, cv::Mat img)
     Cb_max = *max_element(Cb.begin(), Cb.end());
     Cr_min = *min_element(Cr.begin(), Cr.end());
     Cr_max = *max_element(Cr.begin(), Cr.end());
-    cout<<Y_min<<":"<<Cr_min<<":"<<Cb_min<<"\n";
-    cout<<Y_max<<":"<<Cr_max<<":"<<Cb_max<<"\n";
+    //cout<<Y_min<<":"<<Cr_min<<":"<<Cb_min<<"\n";
+    //cout<<Y_max<<":"<<Cr_max<<":"<<Cb_max<<"\n";
+    Y_MIN  = Y_min;
+Y_MAX  = Y_max;
+Cr_MIN = Cr_min;
+Cr_MAX = Cr_max;
+Cb_MIN = Cb_min;
+Cb_MAX = Cb_max;
+
 }
 void SkinDetector::setSkinCrCb(cv::Rect rRect, cv::Mat frame)
 {
@@ -57,9 +66,9 @@ void SkinDetector::setSkinCrCb(cv::Rect rRect, cv::Mat frame)
     cv::Mat roi = frame(rRect);
     
     //cout<<rRect.tl()<<"::"<<rRect.br()<<"\n";
-    for(int y = rRect.y; y < rRect.y + rRect.height - 3; y++){
-    for(int x = rRect.x; x < rRect.x + rRect.width - 3; x++)
-    {
+    for(int x = rRect.x; x < rRect.x + rRect.width; x++){
+    for(int y = rRect.y; y < rRect.y + rRect.height; y++){
+    
         b = frame.at< cv::Vec3b>(x, y)[0];
         g = frame.at< cv::Vec3b>(x, y)[1];
         r = frame.at< cv::Vec3b>(x, y)[2];
@@ -118,7 +127,7 @@ cv::Mat skin;
 //first convert our RGB image to YCrCb
 cv::cvtColor(input,skin,cv::COLOR_BGR2YCrCb);
 //cv::imshow("YCrCb Color Space",skin);
-
+cout<<cv::Scalar(Y_MIN,Cr_MIN,Cb_MIN)<<"\n";
 //filter the image in YCrCb color space
 cv::inRange(skin,cv::Scalar(Y_MIN,Cr_MIN,Cb_MIN),cv::Scalar(Y_MAX,Cr_MAX,Cb_MAX),skin);
 
