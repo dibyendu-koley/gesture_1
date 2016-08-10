@@ -63,72 +63,48 @@ int c = 0;
 VideoCapture cap(0);
 SkinDetector mySkinDetector;
 Mat frame;
+Mat roi,roi_blur,roi_YCbCr;
 Mat edges;
-Mat skinMat,skinMat_tmp;
-Mat threshold_output;
-cv::vector<cv::Vec4i> hierarchy;
-std::vector<std::vector<cv::Point> > contours;
-   Mat drawing = Mat::zeros( threshold_output.size(), CV_8UC3 );
-RNG rng(12345);
-int largest_area = 0;
-int largest_contour_index = 0;
-cv::Rect rRect(Point(100,100),Point(120,120));
-Mat cimg;
-Mat imgYCC;
+Mat skinMat;
+string label1="put your palm inside red box and press i to insialize skin coller";
+cv::Rect rRect1(Point(200,200),Point(250,250));
+// Create a structuring element
+int erosion_size = 6; 
+Mat element = getStructuringElement(cv::MORPH_CROSS,
+    cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
+    cv::Point(erosion_size, erosion_size) );
+//cv::Rect rRect2(Point(100,120),Point(105,125));
+//cv::Rect rRect3(Point(120,100),Point(125,105));
+//cv::Rect rRect4(Point(120,120),Point(125,125));
+//std::vector<cv::Rect> vRect;
+//vRect.push_back(rRect1);vRect.push_back(rRect2);vRect.push_back(rRect3);vRect.push_back(rRect4);
+
+
+//Mat imgYCC1;
   while( true )
      {
     cap >> frame;
-    //imgYCC = cv2.cvtColor(img, cv2.COLOR_BGR2YCR_CB)
-    cv::cvtColor(frame(rRect),imgYCC,cv::COLOR_BGR2YCrCb);
-    frame.copyTo(cimg);
-    mySkinDetector.printSkinCrCb(rRect,cimg(rRect));
-    cout<<"--------------------------------------------------------------------"<<"\n";
+    putText(frame, label1, Point(10, 10), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
+    //cv::circle(frame,cv::Point(rRect.x,rRect.y),5,cv::Scalar(255,255,0),-1,8);
+    //cv::circle(frame,cv::Point(rRect.x+rRect.width,rRect.y),5,cv::Scalar(255,255,0),-1,8);
+
     skinMat= mySkinDetector.getSkin(frame);
-    rectangle( frame, rRect.tl(), rRect.br(), Scalar(0,0,255), 2, 8, 0 );
-//
-//    
-//    skinMat_tmp = mySkinDetector.getSkin(frame);
-//    Mat dst; // result matrix00000
-//    /// Create a structuring element (SE)
-//    int morph_size = 1;
-//    Mat element = getStructuringElement( MORPH_RECT, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
-//    
-//    for (int i=1;i<3;i++)
-//    { 
-//    morphologyEx( skinMat, dst, MORPH_CLOSE, element, Point(-1,-1), i );   
-//    }
-//    findContours( skinMat, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0));
-//	/// Find the convex hull,contours and defects for each contour
-//	vector<vector<Point> >hull(contours.size());
-//	vector<vector<int> >inthull(contours.size());
-//	vector<vector<Vec4i> >defects(contours.size());
-//	for (int i = 0; i < contours.size(); i++)
-//	{
-//		convexHull(Mat(contours[i]), hull[i], false);
-//		convexHull(Mat(contours[i]), inthull[i], false);
-//		if (inthull[i].size()>3)
-//			convexityDefects(contours[i], inthull[i], defects[i]);
-//	}
-//        /// Get the moments
-//  vector<Moments> mu(contours.size() );
-//  for( int i = 0; i < contours.size(); i++ )
-//     { mu[i] = moments( contours[i], false ); }
-//  ///  Get the mass centers:
-//  vector<Point2f> mc( contours.size() );
-//  for( int i = 0; i < contours.size(); i++ )
-//     { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
-//        int s = findBiggestContour(contours);
-//        drawContours(frame, hull, s, CV_RGB(0, 0, 255), 2, 8, hierarchy);
-//               circle( frame, mc[s], 4, CV_RGB(250, 255, 255), -1, 8, 0 );
-//        condefects(defects[s], contours[s],frame);
+    // Apply erosion or dilation on the image
+    erode(skinMat,dst,element);  // dilate(image,dst,element);
+       
+    rectangle( frame, rRect1.tl(), rRect1.br(), Scalar(0,0,255), 2, 8, 0 );
+    
     imshow("frame",frame);
-    imshow("frame1",imgYCC);
     imshow("frame2",skinMat);
-//    imshow("skin",skinMat);
-//    imshow("morf",dst);
+
     int c = waitKey(10);
        if( (char)c == 'q' ) { break; }
-    //waitKey();
+       if( (char)c == 'i' ) {
+           GaussianBlur( frame(rRect1), roi_blur, Size( 15, 15 ), 0, 0 );
+           cv::cvtColor(roi_blur,roi_YCbCr,cv::COLOR_BGR2YCrCb);
+           mySkinDetector.setSkinCrCb(rRect1,roi_YCbCr);
+           label1="";
+       }
 }
 return 0;
 }
