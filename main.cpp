@@ -65,14 +65,20 @@ SkinDetector mySkinDetector;
 Mat frame;
 Mat roi,roi_blur,roi_YCbCr;
 Mat edges;
-Mat skinMat;
+Mat skinMat,skinMat_erd,skinMat_dlt;
 string label1="put your palm inside red box and press i to insialize skin coller";
 cv::Rect rRect1(Point(200,200),Point(250,250));
 // Create a structuring element
-int erosion_size = 6; 
-Mat element = getStructuringElement(cv::MORPH_CROSS,
+int erosion_size = 1; 
+int dilation_size = 2; 
+
+//Mat element_erd = getStructuringElement(cv::MORPH_ELLIPSE,
+Mat element_erd = getStructuringElement(cv::MORPH_RECT,
     cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
     cv::Point(erosion_size, erosion_size) );
+Mat element_dlt = getStructuringElement( cv::MORPH_RECT,
+        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+        Point( dilation_size, dilation_size ) );
 //cv::Rect rRect2(Point(100,120),Point(105,125));
 //cv::Rect rRect3(Point(120,100),Point(125,105));
 //cv::Rect rRect4(Point(120,120),Point(125,125));
@@ -90,13 +96,14 @@ Mat element = getStructuringElement(cv::MORPH_CROSS,
 
     skinMat= mySkinDetector.getSkin(frame);
     // Apply erosion or dilation on the image
-    erode(skinMat,dst,element);  // dilate(image,dst,element);
-       
+    erode(skinMat,skinMat_erd,element_erd);  // dilate(image,dst,element);
+    dilate( skinMat_erd, skinMat_dlt, element_dlt );   
     rectangle( frame, rRect1.tl(), rRect1.br(), Scalar(0,0,255), 2, 8, 0 );
     
     imshow("frame",frame);
     imshow("frame2",skinMat);
-
+    imshow("frame3",skinMat_erd);
+    imshow("frame4",skinMat_dlt);
     int c = waitKey(10);
        if( (char)c == 'q' ) { break; }
        if( (char)c == 'i' ) {
