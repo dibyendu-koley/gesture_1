@@ -4,7 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>Segment.h</itemPath>
       <itemPath>SkinDetector.h</itemPath>
+      <itemPath>hand.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -13,7 +15,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>Segment.cpp</itemPath>
       <itemPath>SkinDetector.cpp</itemPath>
+      <itemPath>hand.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -57,9 +61,17 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="Segment.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Segment.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SkinDetector.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SkinDetector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="hand.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="hand.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -84,9 +96,17 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="Segment.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Segment.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="SkinDetector.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="SkinDetector.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="hand.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="hand.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>

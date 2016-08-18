@@ -10,12 +10,28 @@
  *
  * Created on 22 July, 2016, 10:15 AM
  */
+/*
+Real time Hand and fingers tracking
+Simple static gesture recognition
+using webcam only, it works on kinect too but I am lazy to record another video
+Summary of algorithm/method:
+1)background subtraction using YCrCb color channel, but process each channel separately and combine them together to use as a mask
+2)skin color extraction using YCrCb color channel
+3)contour extraction, remove noises using size threshold, also uses erosion and dilation, also uses gaussian smoothing
+4)use Haar-cascade to detect the face region, then remove it
+5)find convex hull and convexity defects, also find the K-curvature of convexity defects points, then determine it as fingertips if fullfill certain assumption
+6)find the max inscribed circle and min enclosing circle
+6)from those convexity defects that fullfill fingertips assumption, find the largest one, it is the thumb, then find the vector to determine whether it is left or right hand
+7)then recognize the hand gesture based on simple assumption (too much to list here)
+ */
 
 #include <cstdlib>
 #include "opencv2/objdetect/objdetect.hpp"
  #include "opencv2/highgui/highgui.hpp"
  #include "opencv2/imgproc/imgproc.hpp"
  #include"SkinDetector.h"
+#include "Segment.h"
+#include "hand.h"
 
  #include <iostream>
  #include <stdio.h>
@@ -59,51 +75,47 @@ int findBiggestContour(vector<vector<Point> > contours){
 }
 int main()
 {
-int c = 0;
 VideoCapture cap(0);
 SkinDetector mySkinDetector;
+Segment s;
 Mat frame;
-Mat roi,roi_blur,roi_YCbCr;
-Mat edges;
-Mat skinMat,skinMat_erd,skinMat_dlt;
+Mat roi_blur,roi_YCbCr;
+Mat skinMat;
 string label1="put your palm inside red box and press i to insialize skin coller";
 cv::Rect rRect1(Point(200,200),Point(250,250));
 // Create a structuring element
 int erosion_size = 1; 
-int dilation_size = 2; 
+int dilation_size = 1; 
 
 //Mat element_erd = getStructuringElement(cv::MORPH_ELLIPSE,
-Mat element_erd = getStructuringElement(cv::MORPH_RECT,
-    cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
-    cv::Point(erosion_size, erosion_size) );
-Mat element_dlt = getStructuringElement( cv::MORPH_RECT,
-        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
-        Point( dilation_size, dilation_size ) );
-//cv::Rect rRect2(Point(100,120),Point(105,125));
-//cv::Rect rRect3(Point(120,100),Point(125,105));
-//cv::Rect rRect4(Point(120,120),Point(125,125));
-//std::vector<cv::Rect> vRect;
-//vRect.push_back(rRect1);vRect.push_back(rRect2);vRect.push_back(rRect3);vRect.push_back(rRect4);
-
-
-//Mat imgYCC1;
-  while( true )
+//Mat element_erd = getStructuringElement(cv::MORPH_RECT,
+//    cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
+//    cv::Point(erosion_size, erosion_size) );
+//Mat element_dlt = getStructuringElement( cv::MORPH_RECT,
+//        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+//        Point( dilation_size, dilation_size ) );
+//Mat element = getStructuringElement(MORPH_RECT, Size(17, 3) );        //good
+Mat element = getStructuringElement(MORPH_RECT, Size(15, 3) );
+while( true )
      {
     cap >> frame;
     putText(frame, label1, Point(10, 10), FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
-    //cv::circle(frame,cv::Point(rRect.x,rRect.y),5,cv::Scalar(255,255,0),-1,8);
-    //cv::circle(frame,cv::Point(rRect.x+rRect.width,rRect.y),5,cv::Scalar(255,255,0),-1,8);
-
     skinMat= mySkinDetector.getSkin(frame);
-    // Apply erosion or dilation on the image
-    erode(skinMat,skinMat_erd,element_erd);  // dilate(image,dst,element);
-    dilate( skinMat_erd, skinMat_dlt, element_dlt );   
-    rectangle( frame, rRect1.tl(), rRect1.br(), Scalar(0,0,255), 2, 8, 0 );
+    //Mat skinMat_floodfill = skinMat.clone();
+    Mat skinMat_no_face;
+    skinMat_no_face=s.remove_face(frame,skinMat);
     
-    imshow("frame",frame);
-    imshow("frame2",skinMat);
-    imshow("frame3",skinMat_erd);
-    imshow("frame4",skinMat_dlt);
+// Apply erosion or dilation on the image
+//    erode(skinMat,skinMat_erd,element_erd);  // dilate(image,dst,element);
+//    erode(skinMat_erd,skinMat_erd,element_erd);
+//
+//    morphologyEx(skinMat_erd, skinMat_erd, CV_MOP_CLOSE, element);
+//    
+    rectangle( frame, rRect1.tl(), rRect1.br(), Scalar(0,0,255), 2, 8, 0 );
+//    
+    imshow("Original",frame);
+    imshow("Skin",skinMat);
+    imshow("Skin no face",skinMat_no_face);
     int c = waitKey(10);
        if( (char)c == 'q' ) { break; }
        if( (char)c == 'i' ) {
